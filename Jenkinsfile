@@ -7,12 +7,12 @@ pipeline {
         IMAGE_NAME = 'my-spring-boot-app'
         DOCKERHUB_USERNAME = 'ganshekar'
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'
-        INSTANCE_NAME = 'cicd-demo-java'
+        INSTANCE_NAME = 'demo-app'
         ZONE = 'us-central1-c'
-        PORT = '1111'
+        PORT = '4444'
         LOCAL_IMAGE_PATH = 'my-spring-boot-app.tar'
         REMOTE_IMAGE_PATH = '/tmp/my-spring-boot-app.tar'
-        PUBLIC_IP = '34.172.201.30' // Public IP for testing
+        PUBLIC_IP = '34.172.201.30'
         GITHUB_CREDENTIALS_ID = 'github-pat'
     }
 
@@ -21,7 +21,7 @@ pipeline {
             steps {
                 retry(3) {
                     script {
-                        def gitRepoUrl = 'https://github.com/Abuhurera-digi/cicd-demo-java.git'
+                        def gitRepoUrl = 'https://github.com/raajh/my-hello-springboot-app.git'
                         sh "curl --head ${gitRepoUrl} | grep 'HTTP/'"
                         git url: gitRepoUrl, branch: 'master', credentialsId: "${GITHUB_CREDENTIALS_ID}"
                         sh 'git rev-parse HEAD'
@@ -33,7 +33,7 @@ pipeline {
         stage('List Files') {
             steps {
                 script {
-                    sh 'ls -la'
+                    sh 'ls -l'
                 }
             }
         }
@@ -101,27 +101,27 @@ pipeline {
             steps {
                 script {
                     try {
-                        def instanceExists = sh (
+                        def instanceExists = sh(
                             script: "gcloud compute instances describe ${INSTANCE_NAME} --zone=${ZONE} --project=${PROJECT_ID}",
                             returnStatus: true
                         )
                         if (instanceExists != 0) {
                             echo 'VM instance does not exist. Creating VM instance...'
-                            sh '''
+                            sh """
                                 gcloud compute instances create ${INSTANCE_NAME} \
                                     --zone=${ZONE} \
                                     --project=${PROJECT_ID} \
                                     --machine-type=e2-medium \
                                     --image-family=debian-10 \
                                     --image-project=debian-cloud
-                            '''
-                            sh '''
-                                gcloud compute firewall-rules create allow-8080 \
+                            """
+                            sh """
+                                gcloud compute firewall-rules create allow-${PORT} \
                                     --allow tcp:${PORT} \
                                     --network default \
                                     --source-ranges=0.0.0.0/0 \
                                     --description="Allow port ${PORT} access"
-                            '''
+                            """
                         } else {
                             echo 'VM instance already exists.'
                         }
@@ -136,10 +136,10 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh '''
+                        sh """
                             export CLOUDSDK_CORE_HTTP_TIMEOUT=600
-                            gcloud compute scp $LOCAL_IMAGE_PATH $INSTANCE_NAME:$REMOTE_IMAGE_PATH --zone=$ZONE --project=$PROJECT_ID
-                        '''
+                            gcloud compute scp ${LOCAL_IMAGE_PATH} ${INSTANCE_NAME}:${REMOTE_IMAGE_PATH} --zone=${ZONE} --project=${PROJECT_ID}
+                        """
                         echo 'Docker image transferred to GCE VM'
                     } catch (Exception e) {
                         error "Image transfer to GCE failed: ${e.getMessage()}"
@@ -153,34 +153,25 @@ pipeline {
                 script {
                     try {
                         // Load Docker image
-                        def loadImageOutput = sh(script: "gcloud compute ssh $INSTANCE_NAME --zone=$ZONE --command 'sudo docker load -i $REMOTE_IMAGE_PATH'", returnStdout: true).trim()
+                        def loadImageOutput = sh(script: "gcloud compute ssh ${INSTANCE_NAME} --zone=${ZONE} --command \"sudo docker load -i ${REMOTE_IMAGE_PATH}\"", returnStdout: true).trim()
                         echo "Docker image load output:\n${loadImageOutput}"
 
                         // Stop existing containers
-                        def stopContainersOutput = sh(script: "gcloud compute ssh $INSTANCE_NAME --zone=$ZONE --command 'sudo docker stop \$(sudo docker ps -q) || true'", returnStdout: true).trim()
+                        def stopContainersOutput = sh(script: "gcloud compute ssh ${INSTANCE_NAME} --zone=${ZONE} --command \"sudo docker stop \$(sudo docker ps -q) || true\"", returnStdout: true).trim()
                         echo "Stop containers output:\n${stopContainersOutput}"
 
                         // Remove stopped containers
-                        def removeContainersOutput = sh(script: "gcloud compute ssh $INSTANCE_NAME --zone=$ZONE --command 'sudo docker rm \$(sudo docker ps -a -q) || true'", returnStdout: true).trim()
+                        def removeContainersOutput = sh(script: "gcloud compute ssh ${INSTANCE_NAME} --zone=${ZONE} --command \"sudo docker rm \$(sudo docker ps -a -q) || true\"", returnStdout: true).trim()
                         echo "Remove containers output:\n${removeContainersOutput}"
 
                         // Run new container
-                        def runContainerOutput = sh(script: "gcloud compute ssh $INSTANCE_NAME --zone=$ZONE --command 'sudo docker run -d -p $PORT:$PORT ${IMAGE_NAME}:latest'", returnStdout: true).trim()
+                        def runContainerOutput = sh(script: "gcloud compute ssh ${INSTANCE_NAME} --zone=${ZONE} --command \"sudo docker run -d -p ${PORT}:${PORT} ${IMAGE_NAME}:latest\"", returnStdout: true).trim()
                         echo "Run container output:\n${runContainerOutput}"
 
                         echo 'Deployment to GCE completed'
                     } catch (Exception e) {
                         error "GCE deployment failed: ${e.getMessage()}"
                     }
-                }
-            }
-        }
-
-        // New Docker Test Stage
-        stage('Docker Test') {
-            steps {
-                script {
-                    sh 'sudo docker ps'
                 }
             }
         }
