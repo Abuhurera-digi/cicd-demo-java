@@ -7,9 +7,9 @@ pipeline {
         IMAGE_NAME = 'my-spring-boot-app'
         DOCKERHUB_USERNAME = 'ganshekar'
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'
-        INSTANCE_NAME = 'demo-app'
+        INSTANCE_NAME = 'cicd-java'
         ZONE = 'us-central1-c'
-        PORT = '4444'
+        PORT = '1111'
         LOCAL_IMAGE_PATH = 'my-spring-boot-app.tar'
         REMOTE_IMAGE_PATH = '/tmp/my-spring-boot-app.tar'
         PUBLIC_IP = '34.172.201.30'
@@ -21,7 +21,7 @@ pipeline {
             steps {
                 retry(3) {
                     script {
-                        def gitRepoUrl = 'https://github.com/raajh/my-hello-springboot-app.git'
+                        def gitRepoUrl = 'https://github.com/Abuhurera-digi/cicd-demo-java.git'
                         sh "curl --head ${gitRepoUrl} | grep 'HTTP/'"
                         git url: gitRepoUrl, branch: 'master', credentialsId: "${GITHUB_CREDENTIALS_ID}"
                         sh 'git rev-parse HEAD'
