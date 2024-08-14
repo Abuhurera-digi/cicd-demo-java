@@ -21,7 +21,7 @@ pipeline {
             steps {
                 retry(3) {
                     script {
-                        def gitRepoUrl = 'https://github.com/raajh/my-hello-springboot-app.git'
+                        def gitRepoUrl = 'https://github.com/Abuhurera-digi/cicd-demo-java.git'
                         bat "curl --head ${gitRepoUrl} | findstr /R /C:\"HTTP/\""
                         git url: gitRepoUrl, branch: 'master', credentialsId: "${GITHUB_CREDENTIALS_ID}"
                         bat 'git rev-parse HEAD'
