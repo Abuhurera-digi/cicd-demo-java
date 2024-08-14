@@ -1,5 +1,5 @@
-# Use AdoptOpenJDK base image for Java 11
-FROM adoptopenjdk:11-jre-hotspot
+# Use AdoptOpenJDK base image for Java 17
+FROM adoptopenjdk:17-jre-hotspot
 
 # Set the working directory inside the container
 WORKDIR /app
