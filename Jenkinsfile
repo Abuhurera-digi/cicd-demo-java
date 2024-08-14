@@ -175,6 +175,15 @@ pipeline {
                 }
             }
         }
+
+        // New Docker Test Stage
+        stage('Docker Test') {
+            steps {
+                script {
+                    sh 'sudo docker ps'
+                }
+            }
+        }
     }
 
     post {
