@@ -10,5 +10,8 @@ public class Controller {
 	public String cicd() {
 		return "welcome to cicd learning abuHurera";
 	}
-
+	@GetMapping("/abu")
+	public String abu()
+	{
+		return "abuhurera";
 }
