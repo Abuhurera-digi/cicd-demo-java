@@ -8,7 +8,7 @@ public class Controller {
 	
 	@GetMapping("/")
 	public String cicd() {
-		return "welcome to cicd learning abuHurera";
+		return "welcome to cicd learning abuHurera 2nd day testing";
 	}
 	@GetMapping("/abu")
 	public String abu()
