@@ -18,6 +18,6 @@ public class Controller {
 	@GetMapping("/nisha")
 	public String nisha()
 	{
-		return "nisha";
+		return "harini";
 	}
 }
