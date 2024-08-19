@@ -16,7 +16,7 @@ public class Controller {
 		return "abuhurera";
 	}
 	@GetMapping("/nisha")
-	public String abu()
+	public String nisha()
 	{
 		return "nisha";
 	}
