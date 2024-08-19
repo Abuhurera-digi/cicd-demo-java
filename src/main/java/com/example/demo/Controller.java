@@ -15,4 +15,9 @@ public class Controller {
 	{
 		return "abuhurera";
 	}
+	@GetMapping("/nisha")
+	public String abu()
+	{
+		return "nisha";
+	}
 }
