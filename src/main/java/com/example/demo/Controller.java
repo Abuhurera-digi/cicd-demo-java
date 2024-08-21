@@ -16,7 +16,7 @@ public class Controller {
 		return "abuhurera";
 	}
 	@GetMapping("/nisha")
-	public String nisha()
+	public String kouser()
 	{
 		return "harini";
 	}
