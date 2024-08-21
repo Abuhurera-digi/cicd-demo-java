@@ -20,4 +20,9 @@ public class Controller {
 	{
 		return "harini";
 	}
+	@GetMapping("/kouser")
+	public String nisha()
+	{
+		return "Hurera and kouser";
+	}
 }
